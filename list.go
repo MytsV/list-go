@@ -35,10 +35,12 @@ func (l *List) Append(element rune) {
 	}
 }
 
-func (l *List) Insert(element rune, index int) {
+func (l *List) Insert(element rune, index int) error {
+	return nil
 }
 
-func (l *List) Delete(index int) {
+func (l *List) Delete(index int) error {
+	return nil
 }
 
 func (l *List) DeleteAll(element rune) {
