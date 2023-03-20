@@ -1,77 +1,111 @@
 package list
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestLength(t *testing.T) {
+var stubElements = []rune{'a', 'b', 'c', 'd', 'e'}
+
+func getStubElement(idx int) rune {
+	stubIdx := idx % len(stubElements)
+	return stubElements[stubIdx]
+}
+
+func getList(length int) List {
 	list := List{}
+	for i := 0; i < length; i++ {
+		list.Append(getStubElement(i))
+	}
+	return list
+}
 
-	if list.Length() != 0 {
-		t.Fatalf("Empty list's length does not equal 0")
+func TestLength(t *testing.T) {
+	type testCase struct {
+		msg    string
+		length int
 	}
 
-	list.Append('a')
-	if list.Length() != 1 {
-		t.Fatalf("List's length doesn't equal the count of new elements")
+	testCases := []testCase{
+		{
+			msg:    "Returns 0 for empty list",
+			length: 0,
+		},
+		{
+			msg:    "Changes return when a new element is appended",
+			length: 1,
+		},
+		{
+			msg:    "Returns correct value for any append count",
+			length: 1024,
+		},
 	}
 
-	elementCount := 1024
-	for i := 0; i < elementCount; i++ {
-		list.Append('b')
-	}
-	if list.Length() != elementCount+1 {
-		t.Fatalf("List has low limit to the count of elements")
+	for _, test := range testCases {
+		list := getList(test.length)
+		actual := list.Length()
+		assert.Equal(t, test.length, actual, test.msg)
 	}
 }
 
 func TestAppend(t *testing.T) {
-	list := List{}
-
-	list.Append('a')
-	if list.Length() != 1 {
-		t.Fatalf("List's length doesn't change after appending")
-	}
-	value, err := list.Get(0)
-	if err != nil {
-		t.Fatalf("Character wasn't actually appended")
-	} else if value != 'a' {
-		t.Fatalf("Appended and real first character don't match")
-	}
-
-	list.Append('b')
-	value, err = list.Get(0)
-	if value != 'a' || err != nil {
-		t.Fatalf("Existing element doesn't stay the same after appending a new one")
+	msg := "Assigns elements and follows order"
+	length := 10
+	list := getList(length) //getList function uses list.Append()
+	assert := assert.New(t)
+	for i := 0; i < length; i++ {
+		value, err := list.Get(i)
+		assert.Nil(err, msg)
+		assert.Equal(getStubElement(i), value, msg)
 	}
 }
 
 func TestGet(t *testing.T) {
-	list := List{}
-
-	list.Append('a')
-	list.Append('b')
-	list.Append('c')
-	list.Append('d')
-	list.Append('e')
-
-	value, err := list.Get(3)
-	if err != nil {
-		t.Fatalf("Can't retrieve an existing element")
-	} else if value != 'd' {
-		t.Fatalf("Wrong element is being retrieved")
+	length := 15
+	list := getList(length)
+	type testCase struct {
+		msg    string
+		idx    int
+		hasErr bool
 	}
 
-	if list.Length() != 5 {
-		t.Fatalf("Retrieval produces side effects")
+	testCases := []testCase{
+		{
+			msg:    "Retrieves correct element from the head",
+			idx:    0,
+			hasErr: false,
+		},
+		{
+			msg:    "Retrieves correct element from the tail",
+			idx:    length - 1,
+			hasErr: false,
+		},
+		{
+			msg:    "Retrieves correct element from the middle",
+			idx:    length / 2,
+			hasErr: false,
+		},
+		{
+			msg:    "Throws an error when index is negative",
+			idx:    -1,
+			hasErr: true,
+		},
+		{
+			msg:    "Throws an error when index is out of bonds",
+			idx:    length,
+			hasErr: true,
+		},
 	}
 
-	_, err = list.Get(5)
-	if err == nil {
-		t.Fatalf("No error produced on passing an invalid index")
-	}
-	_, err = list.Get(-1)
-	if err == nil {
-		t.Fatalf("No error produced on passing an invalid index")
+	assert := assert.New(t)
+	for _, test := range testCases {
+		value, err := list.Get(test.idx)
+		if test.hasErr {
+			assert.NotNil(err, test.msg)
+		} else {
+			assert.Equal(getStubElement(test.idx), value, test.msg)
+		}
+		assert.Equal(length, list.Length(),
+			"list.Get() has no side effects")
 	}
 }
