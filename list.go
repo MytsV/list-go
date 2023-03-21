@@ -27,12 +27,11 @@ func (l *List) Append(element rune) {
 	node := &Node{key: element}
 	if l.head == nil {
 		l.head = node
-		l.tail = node
 	} else {
 		l.tail.next = node
 		node.prev = l.tail
-		l.tail = node
 	}
+	l.tail = node
 }
 
 func (l *List) Insert(element rune, index int) error {
@@ -44,17 +43,16 @@ func (l *List) Insert(element rune, index int) error {
 		return nil
 	}
 
-	newNode := &Node{key: element}
+	inserted := &Node{key: element}
+	current := l.getNode(index)
+	inserted.next = current
+
 	if index == 0 {
-		newNode.next = l.head
-		l.head.prev = newNode
-		l.head = newNode
+		l.head = inserted
 	} else {
-		node := l.getNode(index)
-		newNode.next = node
-		node.prev.next = newNode
-		newNode.prev = node.prev
-		node.prev = newNode
+		current.prev.next = inserted
+		inserted.prev = current.prev
+		current.prev = inserted
 	}
 	return nil
 }
@@ -63,6 +61,7 @@ func (l *List) Delete(index int) error {
 	if index < 0 || index >= l.Length() {
 		return fmt.Errorf("Invalid index %d", index)
 	}
+
 	if index == 0 {
 		l.head = l.head.next
 		if l.head != nil {
@@ -72,9 +71,9 @@ func (l *List) Delete(index int) error {
 		l.tail = l.tail.prev
 		l.tail.next = nil
 	} else {
-		toDelete := l.getNode(index)
-		toDelete.prev.next = toDelete.next
-		toDelete.next.prev = toDelete.prev
+		deleted := l.getNode(index)
+		deleted.prev.next = deleted.next
+		deleted.next.prev = deleted.prev
 	}
 	return nil
 }
@@ -133,7 +132,7 @@ func (l *List) Reverse() {
 func (l *List) FindFirst(element rune) int {
 	node := l.head
 	pos := 0
-	for pos < l.Length() {
+	for node != nil {
 		if node.key == element {
 			return pos
 		}
@@ -144,17 +143,16 @@ func (l *List) FindFirst(element rune) int {
 }
 
 func (l *List) FindLast(element rune) int {
-	node := l.head
-	pos := 0
-	posLast := -1
-	for pos < l.Length() {
+	node := l.tail
+	pos := l.Length() - 1
+	for node != nil {
 		if node.key == element {
-			posLast = pos
+			return pos
 		}
-		pos++
-		node = node.next
+		pos--
+		node = node.prev
 	}
-	return posLast
+	return -1
 }
 
 func (l *List) Clear() {
@@ -170,6 +168,7 @@ func (l *List) Extend(elements List) {
 	}
 }
 
+// "Private" method. Isn't included in the interface
 func (l *List) getNode(index int) *Node {
 	node := l.head
 	pos := 0
