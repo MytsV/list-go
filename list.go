@@ -101,8 +101,8 @@ func (l *List) Get(index int) (rune, error) {
 	return node.key, nil
 }
 
-func (l *List) Clone(index int) List {
-	return List{}
+func (l *List) Clone() *List {
+	return &List{}
 }
 
 func (l *List) Reverse() {
