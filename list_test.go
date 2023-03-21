@@ -341,3 +341,204 @@ func TestDeleteAll(t *testing.T) {
 		assert.True(t, areSame(list, test.output), test.msg)
 	}
 }
+
+func TestClone(t *testing.T) {
+	type testCase struct {
+		msg    string
+		length int
+	}
+
+	testCases := []testCase{
+		{
+			msg:    "Correctly clones a non-empty list",
+			length: 15,
+		},
+		{
+			msg:    "Correctly clones am empty list",
+			length: 0,
+		},
+	}
+
+	assert := assert.New(t)
+	for _, test := range testCases {
+		list := getList(test.length)
+		clone := list.Clone()
+		assert.NotSame(list, *clone, test.msg)
+
+		assert.Equal(list.Length(), clone.Length(), test.msg)
+		for i := 0; i < list.Length(); i++ {
+			value, err := list.Get(i)
+			valueClone, errClone := clone.Get(i)
+			assert.Nil(err, test.msg)
+			assert.Nil(errClone, test.msg)
+			assert.Equal(value, valueClone, test.msg)
+		}
+	}
+}
+
+func TestReverse(t *testing.T) {
+	type testCase struct {
+		msg    string
+		input  []rune
+		output []rune
+	}
+
+	testCases := []testCase{
+		{
+			msg:    "Reverses a non-empty list : 1",
+			input:  []rune{'a', 'b', 'c', 'd', 'e'},
+			output: []rune{'e', 'd', 'c', 'b', 'a'},
+		},
+		{
+			msg:    "Reverses a non-empty list : 2",
+			input:  []rune{'a', 'a', 'b', 'b'},
+			output: []rune{'b', 'b', 'a', 'a'},
+		},
+		{
+			msg:    "Doesn't panic on empty lists",
+			input:  []rune{},
+			output: []rune{},
+		},
+	}
+
+	for _, test := range testCases {
+		list := constructList(test.input)
+		list.Reverse()
+		assert.True(t, areSame(list, test.output), test.msg)
+	}
+}
+
+func TestFindFirst(t *testing.T) {
+	type testCase struct {
+		msg     string
+		input   []rune
+		element rune
+		pos     int
+	}
+
+	testCases := []testCase{
+		{
+			msg:     "Finds the element in the end",
+			input:   []rune{'a', 'b', 'c', 'd', 'e'},
+			element: 'e',
+			pos:     4,
+		},
+		{
+			msg:     "Finds the element in the beginning",
+			input:   []rune{'a', 'b', 'c', 'd', 'e'},
+			element: 'a',
+			pos:     0,
+		},
+		{
+			msg:     "Finds the element in the middle",
+			input:   []rune{'a', 'b', 'c', 'd', 'e'},
+			element: 'c',
+			pos:     2,
+		},
+		{
+			msg:     "Finds actually the first element",
+			input:   []rune{'a', 'b', 'b', 'b', 'a'},
+			element: 'b',
+			pos:     1,
+		},
+		{
+			msg:     "Returns -1 if there is no such element : 1",
+			input:   []rune{'a', 'b', 'b', 'b', 'a'},
+			element: '9',
+			pos:     -1,
+		},
+		{
+			msg:     "Returns -1 if there is no such element : 2",
+			input:   []rune{},
+			element: 'a',
+			pos:     -1,
+		},
+	}
+
+	for _, test := range testCases {
+		list := constructList(test.input)
+		pos := list.FindFirst(test.element)
+		assert.Equal(t, test.pos, pos, test.msg)
+	}
+}
+
+func TestFindLast(t *testing.T) {
+	type testCase struct {
+		msg     string
+		input   []rune
+		element rune
+		pos     int
+	}
+
+	testCases := []testCase{
+		{
+			msg:     "Finds actually the last element : 1",
+			input:   []rune{'a', 'b', 'b', 'b', 'a'},
+			element: 'b',
+			pos:     3,
+		},
+		{
+			msg:     "Finds actually the last element : 2",
+			input:   []rune{'a', 'b', 'c', 'c', 'a'},
+			element: 'a',
+			pos:     4,
+		},
+		{
+			msg:     "Returns -1 if there is no such element",
+			input:   []rune{'a', 'b', 'c', 'd', 'e'},
+			element: '1',
+			pos:     -1,
+		},
+	}
+
+	for _, test := range testCases {
+		list := constructList(test.input)
+		pos := list.FindLast(test.element)
+		assert.Equal(t, test.pos, pos, test.msg)
+	}
+}
+
+func TestClear(t *testing.T) {
+	list := getList(15)
+	list.Clear()
+	assert.Equal(t, 0, list.Length(), "Makes any list empty")
+}
+
+func TestExtend(t *testing.T) {
+	type testCase struct {
+		msg      string
+		original []rune
+		extender []rune
+		result   []rune
+	}
+
+	testCases := []testCase{
+		{
+			msg:      "Concantenates two non-empty lists",
+			original: []rune{'a', 'b', 'c'},
+			extender: []rune{'d', 'e'},
+			result:   []rune{'a', 'b', 'c', 'd', 'e'},
+		},
+		{
+			msg:      "Can extend with empty lists",
+			original: []rune{'a', 'b', 'c'},
+			extender: []rune{},
+			result:   []rune{'a', 'b', 'c'},
+		},
+		{
+			msg:      "Can extend an empty list",
+			original: []rune{},
+			extender: []rune{'d', 'e'},
+			result:   []rune{'d', 'e'},
+		},
+	}
+
+	for _, test := range testCases {
+		list := constructList(test.original)
+		extender := constructList(test.extender)
+		list.Extend(extender)
+		assert.True(t, areSame(list, test.result), test.msg)
+		//No side effects on extender list
+		assert.True(t, areSame(extender, test.extender), test.msg)
+	}
+}
