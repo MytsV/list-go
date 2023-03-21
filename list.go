@@ -48,6 +48,7 @@ func (l *List) Insert(element rune, index int) error {
 	inserted.next = current
 
 	if index == 0 {
+		l.head.prev = inserted
 		l.head = inserted
 	} else {
 		current.prev.next = inserted

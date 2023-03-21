@@ -1,6 +1,7 @@
 package list
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -541,4 +542,64 @@ func TestExtend(t *testing.T) {
 		//No side effects on extender list
 		assert.True(t, areSame(extender, test.extender), test.msg)
 	}
+}
+
+// Demonstration of all methods. Works as a test (compares output with comments)
+func ExampleList() {
+	printList := func(list List) {
+		for i := 0; i < list.Length(); i++ {
+			value, _ := list.Get(i)
+			fmt.Printf("%c,", value)
+		}
+		fmt.Printf("\n")
+	}
+
+	list := List{}
+	fmt.Printf("%d\n", list.Length())
+	list.Append('a')
+	list.Append('b')
+	list.Append('c')
+	list.Delete(1)
+	list.Insert('d', 0)
+	printList(list) // d,a,c,
+
+	list.Append('c')
+	list.Insert('c', 1)
+	list.DeleteAll('c')
+	printList(list) // d,a,
+
+	value, _ := list.Get(1)
+	fmt.Printf("%c\n", value) // a
+
+	list.Append('b')
+	clone := list.Clone()
+	clone.Reverse()
+	printList(list)   // d,a,b,
+	printList(*clone) // b,a,d,
+
+	list.Append('b')
+	firstPos := list.FindFirst('b')
+	lastPos := list.FindLast('b')
+	fmt.Printf("%d\n", firstPos) // 2
+	fmt.Printf("%d\n", lastPos)  // 3
+
+	fmt.Printf("%d\n", clone.Length()) // 3
+	clone.Clear()
+	fmt.Printf("%d\n", clone.Length()) // 0
+
+	clone.Extend(list)
+	printList(*clone) // d,a,b,b,
+
+	// Output:
+	// 0
+	// d,a,c,
+	// d,a,
+	// a
+	// d,a,b,
+	// b,a,d,
+	// 2
+	// 3
+	// 3
+	// 0
+	// d,a,b,b,
 }
