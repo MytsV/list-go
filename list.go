@@ -102,24 +102,69 @@ func (l *List) Get(index int) (rune, error) {
 }
 
 func (l *List) Clone() *List {
-	return &List{}
+	clone := &List{}
+	node := l.head
+	for node != nil {
+		clone.Append(node.key)
+		node = node.next
+	}
+	return clone
 }
 
 func (l *List) Reverse() {
+	var temp *Node
+	current := l.head
+
+	for current != nil {
+		temp = current.prev
+		current.prev = current.next
+		current.next = temp
+		current = current.prev
+	}
+
+	if temp != nil {
+		l.head = temp.prev
+	}
 }
 
 func (l *List) FindFirst(element rune) int {
+	node := l.head
+	pos := 0
+	for pos < l.Length() {
+		if node.key == element {
+			return pos
+		}
+		pos++
+		node = node.next
+	}
 	return -1
 }
 
 func (l *List) FindLast(element rune) int {
-	return -1
+	node := l.head
+	pos := 0
+	posLast := -1
+	for pos < l.Length() {
+		if node.key == element {
+			posLast = pos
+		}
+		pos++
+		node = node.next
+	}
+	return posLast
 }
 
 func (l *List) Clear() {
+	l.head = nil
+	l.tail = nil
 }
 
 func (l *List) Extend(elements List) {
+	node := elements.head
+	for node != nil {
+		l.Append(node.key)
+		node = node.next
+	}
 }
 
 func (l *List) getNode(index int) *Node {
