@@ -85,7 +85,10 @@ func (l *List) DeleteAll(element rune) {
 	for pos < l.Length() {
 		if node.key == element {
 			node = node.next
-			l.Delete(pos)
+			err := l.Delete(pos)
+			if err != nil {
+				panic("Can't delete all elements because of internal error")
+			}
 		} else {
 			pos++
 			node = node.next
