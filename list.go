@@ -74,7 +74,7 @@ func (l *List) Reverse() {
 func (l *List) FindFirst(element rune) int {
 	for pos := 0; pos < len(l.slice); pos++ {
 		if l.slice[pos] == element {
-			return -1
+			return pos
 		}
 	}
 	return -1
